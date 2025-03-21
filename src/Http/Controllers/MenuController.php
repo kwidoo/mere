@@ -2,13 +2,14 @@
 
 namespace Kwidoo\Mere\Http\Controllers;
 
-use Kwidoo\Mere\Models\MenuItem;
-use Illuminate\Http\Request;
+use Kwidoo\Mere\Contracts\MenuService;
 
 class MenuController
 {
+    public function __construct(protected MenuService $service) {}
+
     public function __invoke()
     {
-        return MenuItem::all();
+        return $this->service->getMenus();
     }
 }

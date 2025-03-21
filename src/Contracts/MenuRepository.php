@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Contracts;
+namespace Kwidoo\Mere\Contracts;
 
 use Prettus\Repository\Contracts\RepositoryInterface;
 

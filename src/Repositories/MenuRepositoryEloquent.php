@@ -4,9 +4,9 @@ namespace Kwidoo\Mere\Repositories;
 
 use Prettus\Repository\Eloquent\BaseRepository;
 use Prettus\Repository\Criteria\RequestCriteria;
-use App\Contracts\MenuRepository;
 use Kwidoo\Mere\Models\MenuItem;
 use App\Validators\MenuValidator;
+use Kwidoo\Mere\Contracts\MenuRepository;
 
 /**
  * Class MenuRepositoryEloquent.

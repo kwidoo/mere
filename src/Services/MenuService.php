@@ -2,11 +2,14 @@
 
 namespace Kwidoo\Mere\Services;
 
+use Kwidoo\Mere\Contracts\MenuRepository;
 use Kwidoo\Mere\Contracts\MenuService as MenuServiceContract;
 use Kwidoo\Mere\Models\MenuItem;
 
 class MenuService implements MenuServiceContract
 {
+    public function __construct(protected MenuRepository $menuRepository) {}
+
     public function getMenus()
     {
         return MenuItem::all();

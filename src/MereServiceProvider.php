@@ -3,7 +3,9 @@
 namespace Kwidoo\Mere;
 
 use Illuminate\Support\ServiceProvider;
+use Kwidoo\Mere\Contracts\MenuRepository;
 use Kwidoo\Mere\Contracts\MenuService as MenuServiceContract;
+use Kwidoo\Mere\Repositories\MenuRepositoryEloquent;
 use Kwidoo\Mere\Services\MenuService;
 
 class MereServiceProvider extends ServiceProvider
@@ -56,6 +58,7 @@ class MereServiceProvider extends ServiceProvider
 
 
         $this->app->bind(MenuServiceContract::class, MenuService::class);
+        $this->app->bind(MenuRepository::class, MenuRepositoryEloquent::class);
 
 
         // Register the main class to use with the facade
