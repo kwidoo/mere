@@ -2,6 +2,7 @@
 
 namespace Kwidoo\Mere\Http\Controllers;
 
+use Exception;
 use Kwidoo\Mere\Contracts\BaseService;
 use Kwidoo\Mere\Http\Requests\BaseRequest;
 use Kwidoo\Mere\Http\Resources\ResourceCollection;
@@ -9,6 +10,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Kwidoo\Mere\Http\Resources\FormResource;
 
 /**
  * @property BaseService $service
@@ -25,11 +27,6 @@ class ResourceController extends Controller
      */
     protected string $updateRequest;
 
-    /**
-     * @var string
-     */
-    protected string $resource;
-
     protected BaseService $service;
 
     public function __construct(Request $request)
@@ -39,6 +36,10 @@ class ResourceController extends Controller
 
         if (isset($resourceMap[$resource])) {
             $this->service = app()->make($resourceMap[$resource]);
+        }
+
+        if (!app()->runningInConsole() && !isset($this->service)) {
+            throw new Exception('Service not set for the resource.');
         }
     }
 
@@ -59,10 +60,9 @@ class ResourceController extends Controller
      *
      * @return JsonResource
      */
-    public function show(string $id): JsonResource
+    public function show(string $id) //: JsonResource
     {
-        $response = $this->service->getById($id);
-        return new $this->resource($response);
+        return new FormResource($this->service->getById($id));
     }
 
     /**
@@ -72,7 +72,7 @@ class ResourceController extends Controller
     {
         $response = $this->service->create($request->validated());
 
-        return new $this->resource($response);
+        return new FormResource($response);
     }
 
     /**
@@ -84,7 +84,7 @@ class ResourceController extends Controller
     {
         $response = $this->service->update($id, $request->validated());
 
-        return new $this->resource($response);;
+        return new FormResource($response);;
     }
 
     /**

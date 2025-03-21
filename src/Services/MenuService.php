@@ -19,4 +19,12 @@ class MenuService implements MenuServiceContract
             return $menuItem->props['fields'];
         }
     }
+
+    public function getRules(string $name)
+    {
+        $menuItem = MenuItem::where('name', $name)->first();
+        if ($menuItem) {
+            return $menuItem->props['rules'];
+        }
+    }
 }

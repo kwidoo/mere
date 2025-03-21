@@ -2,13 +2,20 @@
 
 namespace Kwidoo\Mere\Services;
 
+use Exception;
+use Kwidoo\Mere\Contracts\MenuService;
+use Kwidoo\Mere\Presenters\ResourcePresenter;
 use Prettus\Repository\Contracts\RepositoryInterface;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 /**
  * @property RepositoryInterface $repository
  */
 abstract class BaseService
 {
+    public function __construct(protected MenuService $menuService) {}
     /**
      * Get all lease agreements.
      *
@@ -21,6 +28,8 @@ abstract class BaseService
         if (array_key_exists('columns', $params)) {
             $columns = $params['columns'];
         }
+        $this->repository->setPresenter(ResourcePresenter::class);
+
         return $this->repository->all($columns ?? ['*']);
     }
 
@@ -31,6 +40,8 @@ abstract class BaseService
      */
     public function getPaginated(int $perPage = 15, array $columns = ['*'])
     {
+        $this->repository->setPresenter(ResourcePresenter::class);
+
         return $this->repository->paginate($perPage, $columns);
     }
 
@@ -39,11 +50,19 @@ abstract class BaseService
      *
      * @param string $id
      *
-     * @return \App\Models\LeaseAgreement
+     * @return Model
      */
     public function getById(string $id)
     {
-        return $this->repository->findOrFail($id);
+        $this->repository->setPresenter('Kwidoo\Mere\Presenters\FormPresenter');
+
+        $model = $this->repository->find($id);
+
+        if (!$model) {
+            throw new Exception('Resource not found');
+        }
+
+        return $model;
     }
 
     /**
@@ -56,7 +75,23 @@ abstract class BaseService
     {
         event('before.' . $this->eventKey() . '.created', $data);
 
-        $transaction = $this->repository->create($data);
+        $rules = $this->menuService->getRules(
+            Str::studly(
+                implode('-', [$this->eventKey(), 'create'])
+            )
+        );
+
+        try {
+            $this->repository->setRules([
+                'create' => $rules,
+            ]);
+
+            $transaction = $this->repository->create($data);
+        } catch (Exception $e) {
+            throw ValidationException::withMessages($this->repository->getErrors()->messages())
+                ->errorBag('default')
+                ->redirectTo(url()->previous());
+        }
 
         event('after.' . $this->eventKey() . '.created', $transaction);
 
@@ -74,7 +109,21 @@ abstract class BaseService
     {
         event('before.' . $this->eventKey() . '.updated', [$id, $data]);
 
-        $transaction = $this->repository->update($data, $id);
+        $rules = $this->menuService->getRules(
+            Str::studly(
+                implode('-', [$this->eventKey(), 'update'])
+            )
+        );
+        try {
+            $this->repository->setRules([
+                'update' => $rules,
+            ]);
+            $transaction = $this->repository->update($data, $id);
+        } catch (Exception $e) {
+            throw ValidationException::withMessages($this->repository->getErrors()->messages())
+                ->errorBag('default')
+                ->redirectTo(url()->previous());
+        }
 
         event('after.' . $this->eventKey() . '.updated', $transaction);
 
@@ -96,7 +145,6 @@ abstract class BaseService
 
         return $deleted;
     }
-
 
     abstract protected function eventKey(): string;
 }

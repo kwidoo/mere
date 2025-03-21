@@ -2,16 +2,12 @@
 
 namespace Kwidoo\Mere\Repositories;
 
+use Kwidoo\Mere\Validators\FormValidator;
 use Prettus\Repository\Eloquent\BaseRepository;
-use Kwidoo\Mere\Presenters\ResourcePresenter;
 use Prettus\Repository\Criteria\RequestCriteria;
 
 abstract class RepositoryEloquent extends BaseRepository
 {
-    public function presenter()
-    {
-        return ResourcePresenter::class;
-    }
 
     /**
      * Boot up the repository, pushing criteria
@@ -19,5 +15,20 @@ abstract class RepositoryEloquent extends BaseRepository
     public function boot()
     {
         $this->pushCriteria(app(RequestCriteria::class));
+    }
+
+    public function validator()
+    {
+        return FormValidator::class;
+    }
+
+    public function setRules(array $rules): void
+    {
+        $this->validator->setRules($rules);
+    }
+
+    public function getErrors()
+    {
+        return $this->validator->errorsBag();
     }
 }
