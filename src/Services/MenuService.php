@@ -12,14 +12,14 @@ class MenuService implements MenuServiceContract
 
     public function getMenus()
     {
-        return MenuItem::all();
+        return $this->menuRepository->all();
     }
 
     public function getFields(string $name)
     {
         $menuItem = MenuItem::where('name', $name)->first();
         if ($menuItem) {
-            return $menuItem->props['fields'];
+            return $menuItem?->props['fields'] ?? [];
         }
     }
 
@@ -27,7 +27,7 @@ class MenuService implements MenuServiceContract
     {
         $menuItem = MenuItem::where('name', $name)->first();
         if ($menuItem) {
-            return $menuItem->props['rules'];
+            return $menuItem?->props['rules'] ?? [];
         }
     }
 }

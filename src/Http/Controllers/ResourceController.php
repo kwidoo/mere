@@ -31,17 +31,26 @@ class ResourceController extends Controller
 
     public function __construct(Request $request)
     {
-        $resource = $request->segment(2);
-        $resourceMap = app()->make('resource.map');
+        $resource = $request->route('resource');
+        $resourceMap = config('mere.resources');
 
         if (isset($resourceMap[$resource])) {
             $this->service = app()->make($resourceMap[$resource]);
-        }
-
-        if (!app()->runningInConsole() && !isset($this->service)) {
-            throw new Exception('Service not set for the resource.');
+        } else {
+            throw new \Exception("Unknown resource: {$resource}");
         }
     }
+    // $resource = $request->segment(2);
+    // $resourceMap = app()->make('resource.map');
+
+    // if (isset($resourceMap[$resource])) {
+    //     $this->service = app()->make($resourceMap[$resource]);
+    // }
+
+    // if (!app()->runningInConsole() && !isset($this->service)) {
+    //     throw new Exception('Service not set for the resource.');
+    // }
+
 
     /**
      * Display a listing of lease agreements.

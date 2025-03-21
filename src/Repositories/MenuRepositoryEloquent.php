@@ -4,8 +4,6 @@ namespace Kwidoo\Mere\Repositories;
 
 use Prettus\Repository\Eloquent\BaseRepository;
 use Prettus\Repository\Criteria\RequestCriteria;
-use Kwidoo\Mere\Models\MenuItem;
-use App\Validators\MenuValidator;
 use Kwidoo\Mere\Contracts\MenuRepository;
 
 /**
@@ -22,7 +20,7 @@ class MenuRepositoryEloquent extends BaseRepository implements MenuRepository
      */
     public function model()
     {
-        return MenuItem::class;
+        return config('mere.menu_model');
     }
 
 

@@ -15,13 +15,16 @@ use Illuminate\Validation\ValidationException;
  */
 abstract class BaseService
 {
-    public function __construct(protected MenuService $menuService) {}
+    public function __construct(
+        protected MenuService $menuService,
+        protected RepositoryInterface $repository
+    ) {}
     /**
      * Get all lease agreements.
      *
      * @param array $params
      *
-     * @return \Illuminate\Database\Eloquent\Collection<\App\Models\LeaseAgreement>
+     * @return \Illuminate\Database\Eloquent\Collection<\Illuminate\Database\Eloquent\Model>
      */
     public function getAll(array $params = [])
     {
