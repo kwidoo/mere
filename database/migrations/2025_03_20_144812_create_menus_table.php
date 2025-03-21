@@ -15,7 +15,10 @@ return new class extends Migration
             $table->string('component')->nullable();
             $table->json('redirect')->nullable();
             $table->json('props')->nullable();
-            $table->nestedSet();
+            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->foreign('parent_id')->references('id')->on('menu_items')->onDelete('cascade');
+            $table->integer('_lft')->default(0);
+            $table->integer('_rgt')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

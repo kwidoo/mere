@@ -13,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 /**
  * @property RepositoryInterface $repository
  */
-abstract class BaseService
+abstract class BaseService implements \Kwidoo\Mere\Contracts\BaseService
 {
     public function __construct(
         protected MenuService $menuService,

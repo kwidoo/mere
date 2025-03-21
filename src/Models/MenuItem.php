@@ -2,6 +2,7 @@
 
 namespace Kwidoo\Mere\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Kalnoy\Nestedset\NodeTrait;
 use Prettus\Repository\Contracts\Transformable;
@@ -16,6 +17,9 @@ class MenuItem extends Model implements Transformable
 {
     use TransformableTrait;
     use NodeTrait;
+    use HasFactory;
+
+    protected static $factory = \Kwidoo\Mere\Database\Factories\MenuItemFactory::class;
 
     protected $fillable = [
         'path',

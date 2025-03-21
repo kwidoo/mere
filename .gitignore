@@ -1,0 +1,5 @@
+vendor/**
+concat.sh
+merged.sh
+composer.lock
+.phpunit.result.cache

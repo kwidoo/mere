@@ -4,8 +4,7 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/kwidoo/mere.svg?style=flat-square)](https://packagist.org/packages/kwidoo/mere)
 [![Total Downloads](https://img.shields.io/packagist/dt/kwidoo/mere.svg?style=flat-square)](https://packagist.org/packages/kwidoo/mere)
-![GitHub Actions](https://github.com/kwidoo/mere/actions/workflows/main.yml/badge.svg)
-Awesome — here's the updated and improved `README.md` for your `kwidoo/mere` package, including all recent enhancements:
+![GitHub Actions](https://github.com/kwidoo/mere/actions/workflows/tests.yml/badge.svg)
 
 ---
 

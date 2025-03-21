@@ -6,8 +6,5 @@
 return [
     'menu_model' => \Kwidoo\Mere\Models\MenuItem::class,
 
-    'resources' => [
-        'properties' => \App\Contracts\PropertyService::class,
-        'tenants' => \App\Contracts\TenantService::class,
-    ],
+    'resources' => [],
 ];
