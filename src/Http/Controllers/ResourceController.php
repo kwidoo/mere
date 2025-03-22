@@ -17,40 +17,7 @@ use Kwidoo\Mere\Http\Resources\FormResource;
  */
 class ResourceController extends Controller
 {
-    /**
-     * @var string
-     */
-    protected string $storeRequest;
-
-    /**
-     * @var string
-     */
-    protected string $updateRequest;
-
-    protected BaseService $service;
-
-    public function __construct(Request $request)
-    {
-        $resource = $request->route('resource');
-        $resourceMap = config('mere.resources');
-
-        if (isset($resourceMap[$resource])) {
-            $this->service = app()->make($resourceMap[$resource]);
-        } else {
-            throw new \Exception("Unknown resource: {$resource}");
-        }
-    }
-    // $resource = $request->segment(2);
-    // $resourceMap = app()->make('resource.map');
-
-    // if (isset($resourceMap[$resource])) {
-    //     $this->service = app()->make($resourceMap[$resource]);
-    // }
-
-    // if (!app()->runningInConsole() && !isset($this->service)) {
-    //     throw new Exception('Service not set for the resource.');
-    // }
-
+    public function __construct(protected BaseService $service) {}
 
     /**
      * Display a listing of lease agreements.
