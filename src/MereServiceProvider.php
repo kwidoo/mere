@@ -5,6 +5,7 @@ namespace Kwidoo\Mere;
 use Illuminate\Support\ServiceProvider;
 use Kwidoo\Mere\Contracts\MenuRepository;
 use Kwidoo\Mere\Contracts\MenuService as MenuServiceContract;
+use Kwidoo\Mere\Http\Middleware\BindResource;
 use Kwidoo\Mere\Repositories\MenuRepositoryEloquent;
 use Kwidoo\Mere\Services\MenuService;
 
@@ -20,6 +21,9 @@ class MereServiceProvider extends ServiceProvider
          */
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->loadRoutesFrom(__DIR__ . '/routes.php');
+
+        $router = $this->app['router'];
+        $router->aliasMiddleware('bind.resource', BindResource::class);
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
