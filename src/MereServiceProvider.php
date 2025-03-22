@@ -3,6 +3,7 @@
 namespace Kwidoo\Mere;
 
 use Illuminate\Support\ServiceProvider;
+use Kwidoo\Mere\Console\Commands\SyncMenuCommand;
 use Kwidoo\Mere\Contracts\MenuRepository;
 use Kwidoo\Mere\Contracts\MenuService as MenuServiceContract;
 use Kwidoo\Mere\Http\Middleware\BindResource;
@@ -30,8 +31,13 @@ class MereServiceProvider extends ServiceProvider
                 __DIR__ . '/../config/config.php' => config_path('mere.php'),
             ], 'config');
             $this->commands([
-                \Kwidoo\Mere\Console\Commands\SyncMenuCommand::class,
+                SyncMenuCommand::class,
             ]);
+            $resources = config('mere.resources', []);
+            if (!empty($resources)) {
+                $firstService = reset($resources);
+                $this->app->bind(\Kwidoo\Mere\Contracts\BaseService::class, $firstService);
+            }
         }
     }
 
