@@ -19,6 +19,6 @@ class FormPresenter extends FractalPresenter
      */
     public function getTransformer()
     {
-        return new FormTransformer();
+        return app()->make(FormTransformer::class);
     }
 }

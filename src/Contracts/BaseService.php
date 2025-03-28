@@ -2,6 +2,10 @@
 
 namespace Kwidoo\Mere\Contracts;
 
+use Illuminate\Database\Eloquent\Model;
+use Kwidoo\Mere\Data\ListQueryData;
+use Kwidoo\Mere\Data\ShowQueryData;
+
 interface BaseService
 {
     /**
@@ -9,23 +13,15 @@ interface BaseService
      *
      * @return mixed
      */
-    public function getAll(array $params = []);
-
-    /**
-     * @param int $perPage
-     * @param array $columns
-     *
-     * @return mixed
-     */
-    public function getPaginated(int $perPage = 15, array $columns = ['*']);
+    public function list(ListQueryData $data);
 
     /**
      * Get a single property.
      *
      * @param  string  $id
-     * @return mixed
+     * @return Model
      */
-    public function getById(string $id);
+    public function getById(ShowQueryData $query): Model;
 
     /**
      * Create a new property.
@@ -33,7 +29,7 @@ interface BaseService
      * @param  array  $data
      * @return mixed
      */
-    public function create(array $data);
+    public function create(array $data): mixed;
 
     /**
      * Update an existing property.
@@ -42,7 +38,7 @@ interface BaseService
      * @param  array   $data
      * @return mixed
      */
-    public function update(string $id, array $data);
+    public function update(string $id, array $data): mixed;
 
     /**
      * Delete an existing property.

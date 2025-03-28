@@ -24,6 +24,7 @@ class BaseRequest extends FormRequest
         if ($this->method() === 'PUT') {
             $type = 'Update';
         }
+
         return $this
             ->menuService
             ->getRules(
@@ -32,6 +33,6 @@ class BaseRequest extends FormRequest
                         $this->segment(2)
                     ) . $type
                 )
-            );
+            ) ?? [];
     }
 }

@@ -2,13 +2,16 @@
 
 namespace Kwidoo\Mere\Services;
 
-use Exception;
 use Kwidoo\Mere\Contracts\MenuService;
 use Kwidoo\Mere\Presenters\ResourcePresenter;
 use Prettus\Repository\Contracts\RepositoryInterface;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
+use Kwidoo\Mere\Data\ListQueryData;
+use Kwidoo\Mere\Presenters\FormPresenter;
+use Kwidoo\Mere\Contracts\Lifecycle;
+use Kwidoo\Mere\Data\ShowQueryData;
 
 /**
  * @property RepositoryInterface $repository
@@ -17,88 +20,130 @@ abstract class BaseService implements \Kwidoo\Mere\Contracts\BaseService
 {
     public function __construct(
         protected MenuService $menuService,
-        protected RepositoryInterface $repository
+        protected RepositoryInterface $repository,
+        protected Lifecycle $lifecycle,
     ) {}
-    /**
-     * Get all lease agreements.
-     *
-     * @param array $params
-     *
-     * @return \Illuminate\Database\Eloquent\Collection<\Illuminate\Database\Eloquent\Model>
-     */
-    public function getAll(array $params = [])
-    {
-        if (array_key_exists('columns', $params)) {
-            $columns = $params['columns'];
-        }
-        $this->repository->setPresenter(ResourcePresenter::class);
-
-        return $this->repository->all($columns ?? ['*']);
-    }
 
     /**
-     * @param int $perPage
+     * @param ListQueryData $query
      *
      * @return mixed
      */
-    public function getPaginated(int $perPage = 15, array $columns = ['*'])
+    public function list(ListQueryData $query)
     {
-        $this->repository->setPresenter(ResourcePresenter::class);
+        $presenter = $query->presenter ?? $this->defaultListPresenter();
 
-        return $this->repository->paginate($perPage, $columns);
+        $this->repository->setPresenter($presenter);
+
+        return $this->lifecycle
+            ->withoutEvents()
+            ->withoutTrx()
+            ->run(
+                'viewAny',
+                $this->eventKey(),
+                $query,
+                fn() => $query->perPage
+                    ? $this->repository->paginate($query->perPage, $query->columns)
+                    : $this->repository->all($query->columns)
+            );
     }
 
     /**
      * Get a single lease agreement.
      *
-     * @param string $id
+     * @param ShowQueryData $query
      *
      * @return Model
      */
-    public function getById(string $id)
+    public function getById(ShowQueryData $query): Model
     {
-        $this->repository->setPresenter('Kwidoo\Mere\Presenters\FormPresenter');
+        $presenter = $query->presenter ?? $this->defaultFormPresenter();
 
-        $model = $this->repository->find($id);
+        $this->repository->setPresenter($presenter);
+
+        $model = $this->lifecycle
+            ->withoutEvents()
+            ->withoutTrx()
+            ->run(
+                'view',
+                $this->eventKey(),
+                [],
+                fn() => $this->repository->find($query->id)
+            );
 
         if (!$model) {
-            throw new Exception('Resource not found');
+            throw (new ModelNotFoundException())->setModel(get_class($this->repository->model()));
         }
 
         return $model;
     }
 
     /**
-     * Create a new transaction.
+     * Create a new record.
      *
      * @param  array  $data
      * @return mixed
      */
-    public function create(array $data)
+    public function create(array $data): mixed
     {
-        event('before.' . $this->eventKey() . '.created', $data);
-
-        $rules = $this->menuService->getRules(
-            Str::studly(
-                implode('-', [$this->eventKey(), 'create'])
-            )
+        return $this->lifecycle->run(
+            'create',
+            $this->eventKey(),
+            $data,
+            fn() => $this->handleCreate($data)
         );
+    }
 
-        try {
-            $this->repository->setRules([
-                'create' => $rules,
-            ]);
+    /**
+     * Update an existing record.
+     *
+     * @param  string  $id
+     * @param  array   $data
+     * @return mixed
+     */
+    public function update(string $id, array $data): mixed
+    {
+        return $this->lifecycle->run(
+            'update',
+            $this->eventKey(),
+            $data,
+            fn() => $this->handleUpdate($id, $data)
+        );
+    }
 
-            $transaction = $this->repository->create($data);
-        } catch (Exception $e) {
-            throw ValidationException::withMessages($this->repository->getErrors()->messages())
-                ->errorBag('default')
-                ->redirectTo(url()->previous());
-        }
+    /**
+     * Delete a record.
+     *
+     * @param  string  $id
+     * @return bool
+     */
+    public function delete(string $id): bool
+    {
+        return $this->lifecycle->run(
+            'delete',
+            $this->eventKey(),
+            [],
+            fn() => $this->handleDelete($id)
+        );
+    }
 
-        event('after.' . $this->eventKey() . '.created', $transaction);
+    /**
+     * Handle the creation of a new record.
+     *
+     * @param array $data
+     * @return mixed
+     */
+    protected function handleCreate(array $data): mixed
+    {
+        $rules = $this->menuService->getRules(
+            $this->studlyEvent('create')
+        ) ?? [];
 
-        return $transaction;
+        $this->repository->setRules([
+            'create' => $rules,
+        ]);
+
+        return $this->repository->create($data);
     }
 
     /**
@@ -108,29 +153,16 @@ abstract class BaseService implements \Kwidoo\Mere\Contracts\BaseService
      * @param  array   $data
      * @return mixed
      */
-    public function update(string $id, array $data)
+    protected function handleUpdate(string $id, array $data): mixed
     {
-        event('before.' . $this->eventKey() . '.updated', [$id, $data]);
-
         $rules = $this->menuService->getRules(
-            Str::studly(
-                implode('-', [$this->eventKey(), 'update'])
-            )
-        );
-        try {
-            $this->repository->setRules([
-                'update' => $rules,
-            ]);
-            $transaction = $this->repository->update($data, $id);
-        } catch (Exception $e) {
-            throw ValidationException::withMessages($this->repository->getErrors()->messages())
-                ->errorBag('default')
-                ->redirectTo(url()->previous());
-        }
+            $this->studlyEvent('update')
+        ) ?? [];
 
-        event('after.' . $this->eventKey() . '.updated', $transaction);
-
-        return $transaction;
+        $this->repository->setRules([
+            'update' => $rules,
+        ]);
+        return $this->repository->update($data, $id);
     }
 
     /**
@@ -139,15 +171,36 @@ abstract class BaseService implements \Kwidoo\Mere\Contracts\BaseService
      * @param  string  $id
      * @return bool
      */
-    public function delete(string $id): bool
+    protected function handleDelete(string $id): bool
     {
-        event('before.' . $this->eventKey() . '.deleted', $id);
-        $deleted = $this->repository->delete($id);
-
-        event('after.' . $this->eventKey() . '.deleted', [$id, $deleted]);
-
-        return $deleted;
+        return $this->repository->delete($id);
     }
 
     abstract protected function eventKey(): string;
+
+    /**
+     * @param string $suffix
+     *
+     * @return string
+     */
+    protected function studlyEvent(string $suffix): string
+    {
+        return Str::studly("{$this->eventKey()}-{$suffix}");
+    }
+
+    /**
+     * @return string
+     */
+    protected function defaultListPresenter(): string
+    {
+        return ResourcePresenter::class;
+    }
+
+    /**
+     * @return string
+     */
+    protected function defaultFormPresenter(): string
+    {
+        return FormPresenter::class;
+    }
 }

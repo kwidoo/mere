@@ -10,6 +10,9 @@ class MenuService implements MenuServiceContract
 {
     public function __construct(protected MenuRepository $menuRepository) {}
 
+    /**
+     * @return Collection<MenuItem>
+     */
     public function getMenus()
     {
         return $this->menuRepository->all();
@@ -17,7 +20,7 @@ class MenuService implements MenuServiceContract
 
     public function getFields(string $name)
     {
-        $menuItem = MenuItem::where('name', $name)->first();
+        $menuItem = $this->menuRepository->where('name', $name)->first();
         if ($menuItem) {
             return $menuItem?->props['fields'] ?? [];
         }
@@ -25,7 +28,7 @@ class MenuService implements MenuServiceContract
 
     public function getRules(string $name)
     {
-        $menuItem = MenuItem::where('name', $name)->first();
+        $menuItem = $this->menuRepository->where('name', $name)->first();
         if ($menuItem) {
             return $menuItem?->props['rules'] ?? [];
         }

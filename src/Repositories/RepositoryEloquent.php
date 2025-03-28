@@ -22,7 +22,7 @@ abstract class RepositoryEloquent extends BaseRepository
         return FormValidator::class;
     }
 
-    public function setRules(array $rules): void
+    public function setRules(array $rules = []): void
     {
         $this->validator->setRules($rules);
     }
