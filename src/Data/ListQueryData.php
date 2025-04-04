@@ -13,5 +13,6 @@ class ListQueryData extends Data
         public readonly ?int $perPage = null,
         public readonly array $columns = ['*'],
         public ?string $presenter = null,
+        public ?array $with = null,
     ) {}
 }

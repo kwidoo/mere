@@ -4,6 +4,7 @@ namespace Kwidoo\Mere;
 
 use Illuminate\Support\ServiceProvider;
 use Kwidoo\Mere\Console\Commands\SyncMenuCommand;
+use Kwidoo\Mere\Contracts\Authorizer;
 use Kwidoo\Mere\Contracts\Eventable;
 use Kwidoo\Mere\Contracts\MenuRepository;
 use Kwidoo\Mere\Contracts\MenuService as MenuServiceContract;
@@ -13,7 +14,12 @@ use Kwidoo\Mere\Repositories\MenuRepositoryEloquent;
 use Kwidoo\Mere\Services\MenuService;
 use Kwidoo\Mere\Factories\LaravelTransactions;
 use Kwidoo\Mere\Contracts\Lifecycle;
+use Kwidoo\Mere\Contracts\Loggable;
+use Kwidoo\Mere\Contracts\MenuPropsProvider;
 use Kwidoo\Mere\Executors\LifecycleExecutor;
+use Kwidoo\Mere\Factories\DatabaseMenuPropsProvider;
+use Kwidoo\Mere\Factories\DefaultAuthorizer;
+use Kwidoo\Mere\Factories\LaravelLogger;
 
 class MereServiceProvider extends ServiceProvider
 {
@@ -59,6 +65,9 @@ class MereServiceProvider extends ServiceProvider
         $this->app->bind(Transactional::class, LaravelTransactions::class);
         $this->app->bind(Eventable::class, LaravelEvents::class);
         $this->app->bind(Lifecycle::class, LifecycleExecutor::class);
+        $this->app->bind(MenuPropsProvider::class, DatabaseMenuPropsProvider::class);
+        $this->app->bind(Authorizer::class, DefaultAuthorizer::class);
+        $this->app->bind(Loggable::class, LaravelLogger::class);
 
         // Register the main class to use with the facade
         $this->app->singleton('mere', function () {

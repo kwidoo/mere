@@ -2,6 +2,8 @@
 
 namespace  Kwidoo\Mere\Contracts;
 
+use Spatie\LaravelData\Data;
+
 interface Authorizer
 {
     /**
@@ -12,5 +14,5 @@ interface Authorizer
      * @param array $extra Extra arguments to pass to the gate.
      * @return null
      */
-    public function authorize(string $ability, mixed $resource, array $extra = []);
+    public function authorize(string $ability, mixed $resource, Data $extra);
 }

@@ -9,6 +9,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Kwidoo\Mere\Data\ListQueryData;
+use Kwidoo\Mere\Data\ShowQueryData;
 use Kwidoo\Mere\Factories\ServiceFactory;
 use Kwidoo\Mere\Http\Resources\FormResource;
 
@@ -41,7 +42,7 @@ class ResourceController extends Controller
     {
         $service = $this->factory->make($resource);
 
-        return new FormResource($service->getById($id));
+        return new FormResource($service->getById(new ShowQueryData($id, $resource)));
     }
 
     /**

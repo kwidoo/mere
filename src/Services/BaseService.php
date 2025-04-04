@@ -32,6 +32,7 @@ abstract class BaseService implements \Kwidoo\Mere\Contracts\BaseService
     public function list(ListQueryData $query)
     {
         $presenter = $query->presenter ?? $this->defaultListPresenter();
+        $with = $query->with ?? [];
 
         $this->repository->setPresenter($presenter);
 
@@ -43,8 +44,8 @@ abstract class BaseService implements \Kwidoo\Mere\Contracts\BaseService
                 $this->eventKey(),
                 $query,
                 fn() => $query->perPage
-                    ? $this->repository->paginate($query->perPage, $query->columns)
-                    : $this->repository->all($query->columns)
+                    ? $this->repository->with($with)->paginate($query->perPage, $query->columns)
+                    : $this->repository->with($with)->all($query->columns)
             );
     }
 
@@ -58,6 +59,7 @@ abstract class BaseService implements \Kwidoo\Mere\Contracts\BaseService
     public function getById(ShowQueryData $query): Model
     {
         $presenter = $query->presenter ?? $this->defaultFormPresenter();
+        $with = $query->with ?? [];
 
         $this->repository->setPresenter($presenter);
 
@@ -68,7 +70,7 @@ abstract class BaseService implements \Kwidoo\Mere\Contracts\BaseService
                 'view',
                 $this->eventKey(),
                 [],
-                fn() => $this->repository->find($query->id)
+                fn() => $this->repository->with($with)->find($query->id)
             );
 
         if (!$model) {
